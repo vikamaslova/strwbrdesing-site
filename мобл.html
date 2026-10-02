@@ -1,0 +1,3128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>strwbr — онлайн-приглашение</title>
+
+<style>
+
+/* =========================================================
+   НАСТРОЙКИ
+   ========================================================= */
+
+:root {
+    --red: #9C0000;
+    --red-dark: #F50E57;
+    --cream: #FEDFF6;
+    --white: #ffffff;
+    --black: #171313;
+    --gray: #777;
+    --line: #FFFFFF;
+    --radius: 20px;
+}
+
+
+/* =========================================================
+   ШРИФТЫ
+   ЗАМЕНИ НАЗВАНИЯ НА СВОИ ПОСЛЕ ПОДГРУЗКИ
+   ========================================================= */
+
+@font-face {
+    font-family: 'Nauryz';
+    src: url('./NauryzRedKeds.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('./Inter-Light.woff') format('woff');
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('./Inter-Regular.woff') format('woff');
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--red);
+    color: var(--black);
+    font-family: 'Nauryz',sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+section {
+    position: relative;
+}
+
+
+/* =========================================================
+   ОБЩИЕ КЛАССЫ
+   ========================================================= */
+
+.container {
+    width: calc(100% - 20px);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   АНИМАЦИИ
+   ========================================================= */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(35px);
+    transition:
+        opacity 1s ease,
+        transform 1s cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+@keyframes floatingrt {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(9px);
+    }
+}
+@keyframes glow {
+    0%,100% {
+        box-shadow: 0 0 0 rgba(127,23,33,0);
+    }
+
+    50% {
+        box-shadow: 0 0 35px rgba(127,23,33,.18);
+    }
+}
+/* =========================================================
+   PRELOADER
+   ========================================================= */
+
+   .preloader {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100dvh;
+
+    z-index: 99999;
+
+    background: #9C0000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        opacity 1s ease,
+        visibility 1s ease;
+}
+
+.preloader video {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+
+/* когда видео закончилось */
+
+.preloader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header {
+    position: fixed;
+    top: 10px;
+    left: 5px;
+    right: 5px;
+    z-index: 1000;
+
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 14px;
+
+    background: rgba(248,244,238,0.30);
+    border: 1px solid rgba(255,255,255,0.45);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-radius: 100px;
+
+    box-shadow:
+        0 10px 35px rgba(65,24,25,.08);
+}
+
+.logo {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: #ffffff;
+}
+
+.burger {
+    width: 25px;
+    height: 40px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+
+    background: transparent;
+}
+
+.burger span {
+    width: 22px;
+    height: 1.5px;
+    background: white;
+    transition: .3s;
+}
+
+.burger.active span:first-child {
+    transform: translateY(3.25px) rotate(45deg);
+}
+
+.burger.active span:last-child {
+    transform: translateY(-3.25px) rotate(-45deg);
+}
+
+
+/* =========================================================
+   SIDE MENU
+   ========================================================= */
+
+.side-menu {
+    position: fixed;
+    z-index: 999;
+
+    top: 0;
+    right: 0;
+
+    width: min(100vw, 420px);
+    height: 100dvh;
+
+    background: var(--red);
+
+    padding: 90px 10px 5px;
+
+    transform: translateX(105%);
+    transition: transform .55s cubic-bezier(.77,0,.18,1);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.side-menu.open {
+    transform: translateX(0);
+}
+
+.menu-title {
+    color: rgba(255,255,255,.5);
+    font-size: 12px;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.menu-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-links a {
+    color: white !important;
+    font-size: 22px;
+    line-height: 1;
+
+    padding: 18px 0 13px;
+
+    border-bottom: 1px solid rgba(255,255,255,.18);
+
+    transition: .3s;
+}
+
+.menu-links a:hover {
+    padding-left: 8px;
+}
+
+.menu-order {
+    margin-top: 30px;
+    width: 100%;
+    padding: 23px 17px 17px;
+    border-radius: 50px;
+
+    background: white;
+    color: var(--red);
+    font-family: 'Nauryz';
+    font-size: 16px;
+    line-height: 1.1;
+}
+/* =========================================================
+   SOCIALS
+   ========================================================= */
+
+   .menu-socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 14px;
+    margin-bottom: 20px;
+    margin-top:auto;
+}
+
+.menu-socials a {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    transition: transform .25s ease;
+}
+
+.menu-socials img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+}
+
+.menu-socials a:active {
+    transform: scale(.9);
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    min-height: 100svh;
+    background:var(--red);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 0 25px;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: clamp(24px, 8vw, 28px);
+    font-family: 'Nauryz';
+    max-width: 359px;
+    min-width: 280px;
+    margin-top: 30px;
+    line-height:100%;
+    max-width: 100%;
+    color: #ffffff;
+    text-align: center;
+}
+
+.hero-description {
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    color: #ffffff;
+    font-size: 12px;
+    line-height: 120%;
+    max-width: 327px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.hero-image {
+    position: relative;
+    overflow: hidden;
+    display: block;
+    margin: 30px auto 0;
+    animation: floating 3s ease-in-out infinite;
+}
+
+.main-button {
+    margin: 30px auto 0;
+    padding-top: 5px;
+    width: 180px;
+    height: 50px;
+    border-radius: 50px;
+    background: white;
+    color: var(--red);
+    font-family: 'Nauryz';
+    font-size: 16px;
+    line-height: 1.1;
+    display: block;
+    transition:
+        transform .3s,
+        box-shadow .3s;
+}
+
+.main-button:active {
+    transform: scale(.97);
+}
+
+.main-button:hover {
+    box-shadow: 0 12px 30px rgba(127,23,33,.25);
+}
+
+
+/* =========================================================
+   ПРЕИМУЩЕСТВА
+   ========================================================= */
+
+   .advantages {
+    margin-top: -1px;
+    padding: 50px 0 60px;
+    margin-bottom: 110px;
+    background: var(--white);
+    border-radius: 20px;
+    position: relative;
+    z-index: 5;
+}
+
+.section-title-adv {
+    font-size: 32px;
+    font-family: 'Nauryz';
+    line-height:1.1;
+    margin-bottom: 14px;
+    text-align: center;
+    color: #9C0000;
+}
+
+
+/* =========================================================
+   ЗАГОЛОВОК + ОПИСАНИЕ
+   ========================================================= */
+
+.section-subtitle-adv {
+    width: 100%;
+    max-width: 352px;
+    margin: 0 auto;
+    font-size: 12px;
+    line-height: 1.35;
+
+    color: #2E2E2E;
+
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    text-align: center;
+}
+
+
+/* =========================================================
+   КАРТОЧКИ
+   ========================================================= */
+
+.advantages-grid {
+    width: 100%;
+    max-width: 300px;
+
+    margin: 35px auto 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 30px;
+}
+
+
+/* =========================================================
+   ОБЩИЕ НАСТРОЙКИ КАРТОЧЕК
+   ========================================================= */
+
+.adv-card {
+    width: 100%;
+    min-height: 100px;
+    z-index: 1000;
+    font-family: 'Nauryz';
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.1;
+
+    box-sizing: border-box;
+
+    border-radius: 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    overflow: hidden;
+
+    transition:
+        transform 1.5s cubic-bezier(.2,.8,.2,1),
+        opacity 1.5s ease;
+}
+
+
+/* =========================================================
+   КАРТОЧКА 01
+   ========================================================= */
+
+.adv-card:nth-child(1) {
+    background: #FFFFFF;
+    color: #9C0000;
+
+    border: 1px solid #9C0000;
+    border-radius: 20px;
+
+    opacity: 0;
+
+    transform:
+        translateX(-100px)
+        rotate(-2.45deg);
+}
+
+.adv-card:nth-child(1).visible {
+    opacity: 1;
+
+    transform:
+        translateX(0)
+        rotate(-2.45deg);
+}
+
+
+/* =========================================================
+   КАРТОЧКА 02
+   ========================================================= */
+
+.adv-card:nth-child(2) {
+    background: #FEDFF6;
+    color: #9C0000;
+    margin-top: 3px;
+    opacity: 0;
+
+    transform:
+        translateX(100px)
+        rotate(8.92deg);
+}
+
+.adv-card:nth-child(2).visible {
+    opacity: 1;
+
+    transform:
+        translateX(0)
+        rotate(8.92deg);
+}
+
+
+/* =========================================================
+   КАРТОЧКА 03
+   ========================================================= */
+
+.adv-card:nth-child(3) {
+    background: #9C0000;
+    color: #FFFFFF;
+    margin-top: 3px;
+    opacity: 0;
+
+    transform:
+        translateX(-100px)
+        rotate(-4.24deg);
+}
+
+.adv-card:nth-child(3).visible {
+    opacity: 1;
+
+    transform:
+        translateX(0)
+        rotate(-4.24deg);
+}
+
+
+/* =========================================================
+   КАРТОЧКА 04
+   ========================================================= */
+
+.adv-card:nth-child(4) {
+    background: #FFFFFF;
+    color: #9C0000;
+
+    border: 1px solid #9C0000;
+    border-radius: 20px;
+
+    opacity: 0;
+
+    transform:
+        translateX(100px)
+        rotate(4.51deg);
+}
+
+.adv-card:nth-child(4).visible {
+    opacity: 1;
+
+    transform:
+        translateX(0)
+        rotate(4.51deg);
+}
+
+
+/* =========================================================
+   ФОТОГРАФИИ ПОД КАРТОЧКАМИ
+   ========================================================= */
+
+.advantages-images {
+    position: relative;
+
+    width: calc(100% + 40px);
+
+    margin-left: -20px;
+    margin-top: 0;
+    height: 0;
+    overflow: visible;
+}
+
+
+/* =========================================================
+   КУБИК — В ЛЕВОМ КРАЮ
+   ========================================================= */
+
+.kubik-image {
+    position: absolute;
+
+    left: 10px;
+    top: -350px;
+    bottom: 0;
+    animation: floatingrt 4s ease-in-out infinite;
+    z-index: 1;
+   
+}
+
+
+/* =========================================================
+   КРЕНДЕЛЬ — В ПРАВОМ КРАЮ
+   ========================================================= */
+
+.krendel-image {
+    position: absolute;
+
+    right: 10px;
+    top: -500px;
+    bottom: 0;
+    animation: floating 4s ease-in-out infinite;
+    z-index: 1;
+}
+
+
+/* =========================================================
+   КАТАЛОГ
+   ========================================================= */
+
+.catalog {
+    background: var(--red);
+    overflow: hidden;
+    padding: 0 0;
+    margin-bottom: 90px;
+}
+
+.section-title-ctlg {
+    font-size: 32px;
+    line-height: 1.1;
+    font-family: 'Nauryz';
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+
+
+.slider {
+    overflow: hidden;
+}
+
+.slider-track {
+    display: flex;
+    gap: 12px;
+
+    transition: transform .55s cubic-bezier(.2,.8,.2,1);
+
+    touch-action: pan-y;
+}
+
+.catalog-card {
+    flex: 0 0 100%;
+
+    background: var(--red);
+    border: 1px solid #FFFFFF;
+    height: 470px;
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    box-shadow: 0 15px 40px rgba(45,20,20,.08);
+}
+
+.catalog-image {
+    width: 100%;
+    height: 252px;
+    position: relative;
+    margin-top: 20px;
+}
+
+.catalog-image::after {
+    content: "IMAGE";
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #999;
+    font-size: 11px;
+    letter-spacing: .15em;
+}
+
+.catalog-info {
+    padding: 20px;
+}
+
+.catalog-name {
+    font-size: 20px;
+    line-height: 1.1;
+    font-family: 'Nauryz';
+    letter-spacing: 0em;
+    margin-bottom: 7px;
+    color: #ffffff;
+}
+
+.catalog-description {
+    font-size: 12px;
+    line-height: 1.45;
+    color: #ffffff;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+}
+
+.main-button-ctlg{
+    width: 180px;
+    height: 50px;
+    border-radius: 50px;
+    padding-top: 5px;
+    background: #BA4C4C;
+    color: var(--white);
+    font-family: 'Nauryz';
+    font-size: 16px;
+    line-height: 110%;
+    display: block;
+    transition:
+        transform .3s,
+        box-shadow .3s;
+}
+.catalog-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Круглая кнопка PDF */
+
+.catalog-pdf {
+    flex: 0 0 46px;
+
+    width: 46px;
+    height: 46px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #BA4C4C;
+    color: #FFFFFF;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 23px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 18px;
+}
+
+.slider-arrow {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 50%;
+
+    background: var(--red);
+    color: white;
+
+    font-size: 18px;
+}
+
+.slider-counter {
+    font-size: 13px;
+    color: #ffffff;
+}
+
+/* =========================================================
+   PDF VIEWER
+   ========================================================= */
+
+   .pdf-viewer {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100dvh;
+
+    background: #FFFFFF;
+
+    z-index: 99999;
+
+    display: none;
+
+    overflow: hidden;
+}
+
+
+/* Когда PDF открыт */
+
+.pdf-viewer.active {
+    display: block;
+}
+
+
+/* Сам PDF */
+
+.pdf-frame {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border: none;
+
+    background: #FFFFFF;
+}
+
+
+/* =========================================================
+   КНОПКА «ВЕРНУТЬСЯ НАЗАД»
+   ========================================================= */
+
+.pdf-back {
+    position: fixed;
+
+    left: 50%;
+    bottom: 18px;
+
+    transform: translateX(-50%);
+
+    z-index: 100000;
+
+    min-width: 190px;
+    height: 48px;
+
+    padding: 0 24px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: #9C0000;
+    color: #FFFFFF;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, .18);
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   ТАРИФЫ
+   ========================================================= */
+
+.tariffs {
+    background: var(--red);
+    color: #FFFFFF;
+    padding: 0 0;
+    margin-bottom: 20px;
+}
+
+.tariff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.section-title-tarif {
+    font-size: 32px;
+    line-height: 1.1;
+    font-family: 'Nauryz';
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.tariff {
+    position: relative;
+    padding: 20px 20px;
+    background: var(--red);
+    color:#FFFFFF;
+
+    border-radius: 20px;
+    height: 240px;
+
+    border: 1px solid #ffffff;
+
+    transition: .4s;
+}
+
+.tariff:hover {
+    transform: translateY(-5px);
+}
+
+.tariff.premium {
+    background: var(--red);
+    color: white;
+}
+
+.tariff-top {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.tariff-name {
+    font-size: 20px;
+}
+
+.tariff-price {
+    margin-top: 7px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #FEDFF6;
+    margin-bottom: 7px;
+}
+
+.tariff-more {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 10px;
+    line-height: 120%;
+    color: #CDCDCD;
+}
+
+.tariff ul {
+    list-style: none;
+}
+
+.tariff li {
+    padding: 2px 0;
+    border-top: 1px solid rgba(127,23,33,.12);
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 143%;
+}
+
+
+.tariff li::before {
+    content: "• ";
+}
+/* =========================================================
+  видео
+   ========================================================= */
+.video-image{
+    position: relative;
+    overflow: hidden;
+    display: block;
+    margin: 0 auto 30px;
+    background: #9C0000;
+}
+.full-photo{
+    background: #9C0000;
+}
+/* =========================================================
+   ЭТАПЫ
+   ========================================================= */
+
+.steps {
+    background: var(--red);
+    color: #FFFFFF;
+    padding: 0 0;
+    margin-bottom: 110px;
+}
+
+.step {
+    display: grid;
+    grid-template-columns: 1fr 32px;
+    align-items: center;
+    padding: 20px 0;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.section-title-steps {
+    font-size: 32px;
+    line-height: 1.1;
+    font-family: 'Nauryz';
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+.step:first-of-type {
+    border-top: 1px solid var(--line);
+}
+
+.step-number {
+    font-family: 'Nauryz';
+    color: #ffffff;
+    font-size: 26px;
+    line-height: 1; 
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step h3 {
+    font-family: 'Nauryz';
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1.1; 
+    margin-bottom: 7px;
+}
+
+.step p {
+    color: #ffffff;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 140%;
+}
+
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
+.faq {
+    padding: 40px 0px 0px 0px;
+    margin-bottom: 110px;
+    background: var(--white);
+    border-radius: 20px;
+    position: relative;
+    z-index: 5;
+}
+.faq-image{
+    position: relative;
+    overflow: hidden;
+    display: block;
+    margin: 0 auto 30px;
+}
+
+.section-title-faq {
+    font-size: clamp(26px, 8vw, 30px);
+    line-height: 1.1;
+    font-family: 'Nauryz';
+    margin-bottom: 20px;
+    text-align: center;
+    color: #9C0000;
+}
+.faq-item {
+    border-top: 1px solid #D9D9D9;
+}
+
+.faq-question {
+    width: 100%;
+
+    padding: 20px 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: transparent;
+
+    color: #000000;
+    text-align: left;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 120%;
+
+}
+
+.faq-plus {
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nauryz';
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 500;
+    padding-top: 10px;
+    color: var(--red);
+
+    transition: transform .35s ease;
+}
+
+.faq-item.active .faq-plus {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+
+    transition:
+        max-height .45s ease,
+        padding .45s ease;
+
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 120%;
+    color: #000000;
+
+}
+
+.faq-item.active .faq-answer {
+    max-height: 300px;
+    padding-bottom: 22px;
+}
+
+/* =========================================================
+   CONTACTS
+   ========================================================= */
+
+   .contacts {
+    background: var(--red);
+    padding: 0 -10px;
+    margin-bottom: 0px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer {
+    position: relative;
+    height: 642px;
+
+    background-image: url("malina.png");
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   FOOTER CONTENT
+   ========================================================= */
+
+.footer-content {
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+    bottom: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   SOCIAL ICONS
+   ========================================================= */
+
+.footer-socials {
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+.footer-social {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: transform 0.25s ease;
+}
+
+
+.footer-social img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+
+.footer-social:active {
+    transform: scale(0.92);
+}
+
+
+/* =========================================================
+   EMAIL
+   ========================================================= */
+
+.footer-email {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.3;
+    color: #FFFFFF;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-bottom: 10px;
+}
+
+
+/* =========================================================
+   COPYRIGHT
+   ========================================================= */
+
+.footer-copy {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 100%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin-bottom: 5px;
+}
+
+
+/* =========================================================
+   PRIVACY POLICY
+   ========================================================= */
+
+.footer-policy {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 100%;
+    color: #FFFFFF;
+
+    text-decoration: none;
+}
+
+
+.footer-policy:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+
+/* =========================================================
+   POPUP
+   ========================================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+
+    z-index: 2000;
+
+    background: rgba(20,8,10,.55);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    visibility: hidden;
+    transition: .4s;
+}
+
+.modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    width: 100%;
+    max-height: 94svh;
+    overflow-y: auto;
+    background: #FFFFFF;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 35px;
+    transform: translateY(100%);
+    transition:
+        transform .55s cubic-bezier(.2,.8,.2,1);
+}
+
+.modal.open .modal-content {
+    transform: translateY(0);
+}
+
+.modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 28px;
+}
+
+.modal-title {
+    font-size: 32px;
+    font-family: 'Nauryz';
+    line-height:1.1;
+    margin-bottom: 14px;
+    text-align: left;
+    color: #9C0000;
+}
+
+.close-modal {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(127,23,33,.08);
+    color: var(--red);
+    font-size: 25px;
+    padding-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.form-input,
+.form-select {
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+
+    width: 100%;
+    height: 53px;
+
+    border: 1px solid rgba(127,23,33,.18);
+    border-radius: 15px;
+    background: white;
+    padding: 0 15px;
+    outline: none;
+    color: var(--black);
+    font-size: 14px;
+    transition: border .3s, box-shadow .3s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(127,23,33,.08);
+}
+
+.checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: 'Inter';
+    font-style: light;
+    font-weight: 300;
+    margin: 14px 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #665d5d;
+}
+
+.checkbox input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--red);
+    flex-shrink: 0;
+}
+
+.form-submit {
+    width: 100%;
+    height: 56px;
+    margin-top: 10px;
+    border-radius: 50px;
+    background: var(--red);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DESKTOP — НЕ РАСТЯГИВАЕМ ДИЗАЙН
+   ========================================================= */
+
+@media (min-width: 601px) {
+
+    body {
+        background: #ddd;
+    }
+
+    .header,
+    .side-menu {
+        max-width: 600px;
+    }
+
+    .header {
+        left: 50%;
+        right: auto;
+        width: calc(100% - 20px);
+        transform: translateX(-50%);
+    }
+
+    .side-menu {
+        left: 50%;
+        right: auto;
+        transform: translateX(calc(50% + 600px));
+    }
+
+    .side-menu.open {
+        transform: translateX(calc(50% - 0px));
+    }
+
+    .hero,
+    .section {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    .modal {
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        max-width: 500px;
+        border-radius: 30px;
+        max-height: 90vh;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+  <div class="preloader" id="preloader">
+        <video
+            id="preloaderVideo"
+            autoplay
+            muted
+            playsinline
+            preload="auto"
+            >
+            <source src="preloader.mp4" type="video/mp4">
+        </video>
+ </div>
+    
+        <!-- ВЕСЬ ТВОЙ САЙТ НИЖЕ -->
+<!-- =======================================================
+     HEADER
+     ======================================================= -->
+
+<header class="header">
+
+    <a href="#home" class="logo">strwbr</a>
+
+    <button class="burger" id="burger" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+    </button>
+
+</header>
+
+
+<!-- =======================================================
+     SIDE MENU
+     ======================================================= -->
+
+<nav class="side-menu" id="sideMenu">
+
+    <div class="menu-title">
+        Навигация
+    </div>
+
+    <div class="menu-links">
+
+        <a href="#advantages">Преимущества</a>
+        <a href="#tariffs">Тарифы</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#steps">Этапы</a>
+        <a href="#faq">Вопросы</a>
+        <a href="#contacts">Контакты</a>
+
+    </div>
+    
+    <button class="menu-order" data-open-modal>
+        Заказать
+    </button>
+    <div class="menu-socials">
+        <a
+            href="https://www.instagram.com/strwbrdesing?stkn=N2l0YzA0Nmh2eXRj&utm_source=qr"
+            class="footer-social"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+        >
+            <img src="instagram.svg" alt="">
+        </a>
+
+        <a
+            href="https://t.me/mslwvika"
+            class="footer-social"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+        >
+            <img src="telegram.svg" alt="">
+        </a>
+
+    </div>
+</nav>
+
+
+
+<!-- =======================================================
+     HERO
+     ======================================================= -->
+
+<main>
+
+<section class="hero" id="home">
+
+    <div class="container">
+
+        <div class="hero-content reveal">
+            <img src="bant.png" alt="" style="width: 171px;" class="hero-image">
+        
+            
+            <h1 class="hero-title">
+                Онлайн приглашение <br> для вашей свадьбы
+            </h1>
+
+            <p class="hero-description">
+                Вместо классических бумажных пригласительных — стильное онлайн-приглашение, которое гости точно не потеряют! Всё, что нужно — одна красивая ссылка с важной информацией о вашем дне.
+            </p>
+
+            <button class="main-button" data-open-modal>
+                Заказать
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =======================================================
+     ADVANTAGES
+     ======================================================= -->
+
+<section class="advantages section" id="advantages">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <h2 class="section-title-adv">
+                Преимущества
+            </h2>
+
+            <p class="section-subtitle-adv">
+                Создайте незабываемое впечатление с интерактивными приглашениями на вашу свадьбу! Ваши близкие и друзья будут в восторге от уникального способа узнать о вашем важном событии.
+            </p>
+
+        </div>
+
+
+        <div class="advantages-grid" style="margin-top:35px;">
+
+            <article class="adv-card">
+                <h3>Лёгкая отправка: делитесь ссылкой в мессенджерах</h3>
+            </article>
+
+            <article class="adv-card">
+                <h3>Эстетика и внимание <br> к деталям</h3>
+            </article>
+        
+            <article class="adv-card">
+                <h3>Удобное заполнение анкеты для гостей</h3>
+            </article>
+
+            <article class="adv-card">
+                <h3>Без суеты с печатью <br> и доставкой</h3>
+            </article>
+        </div>
+        <div class="advantages-images">
+            <img src="kubik.png" alt="" style="width: 145px;" class="kubik-image">
+            <img src="krendel.png" alt="" style="width: 165px;" class="krendel-image">
+        </div>
+        
+
+    </div>
+
+</section>
+
+
+
+<!-- =======================================================
+     CATALOG
+     ======================================================= -->
+
+<section class="catalog section" id="catalog">
+
+    <div class="container">
+
+        <div class="catalog-header reveal">
+
+            <h2 class="section-title-ctlg">
+                Каталог шаблонов
+            </h2>
+            <div class="slider" id="slider">
+
+                <div class="slider-track" id="sliderTrack">
+    
+    
+                    <!-- 1 -->
+    
+                    <article class="catalog-card">
+    
+                        <img src="./romans.png" width="380px"class="catalog-image">
+    
+                        <div class="catalog-info">
+    
+                            <h3 class="catalog-name">
+                                Романтик
+                            </h3>
+    
+                            <p class="catalog-description">
+                                Воздушная и элегантная структура с утончёнными акцентами. Идеальный выбор для классической романтичной свадьбы с нотками утончённости.
+                            </p>
+                            <div class="catalog-actions">
+    
+                                <button class="main-button-ctlg" data-open-modal>
+                                    Заказать
+                                </button>
+                    
+                                <a
+                                    href="романтик.pdf"
+                                    class="catalog-pdf"
+                                    target="_blank"
+                                    aria-label="Открыть PDF"
+                                >
+                                   &gt;
+                                </a>
+                    
+                            </div>
+                    
+                        </div>
+    
+                    </article>
+    
+    
+                    <!-- 2 -->
+    
+                    <article class="catalog-card">
+    
+                        <img src="./granat.png" width="380px" class="catalog-image">
+    
+                        <div class="catalog-info">
+    
+                            <h3 class="catalog-name">
+                                Гранат
+                            </h3>
+    
+                            <p class="catalog-description">
+                                Яркое и атмосферное приглашение в оттенках глубокого бордо. Идеальный шаблон для свадьбы с нотками старинной романтики и страстной эстетикой.
+                            </p>
+                            <div class="catalog-actions">
+    
+                                <button class="main-button-ctlg" data-open-modal>
+                                    Заказать
+                                </button>
+                    
+                                <a
+                                    href="iPhone 13 & 14 - 5.pdf"
+                                    class="catalog-pdf"
+                                    target="_blank"
+                                    aria-label="Открыть PDF"
+                                >
+                                  &gt;
+                                </a>
+                    
+                            </div>  
+                        </div>
+    
+                    </article>
+    
+    
+                    <!-- 3 -->
+    
+                    <article class="catalog-card">
+    
+                        <img src="./minim.png" width="380px" class="catalog-image">
+    
+                        <div class="catalog-info">
+    
+                            <h3 class="catalog-name">
+                                Минимализм
+                            </h3>
+    
+                            <p class="catalog-description">
+                                Строгая, чистая композиция с акцентом на структуру и простоту. Минимум деталей и максимум стиля — для современных и сдержанных пар.
+                            </p>
+                            <div class="catalog-actions">
+    
+                                <button class="main-button-ctlg" data-open-modal>
+                                    Заказать
+                                </button>
+                    
+                                <a
+                                    href="минимализм.pdf"
+                                    class="catalog-pdf"
+                                    target="_blank"
+                                    aria-label="Открыть PDF"
+                                >
+                                  &gt;
+                                </a>
+                    
+                            </div>
+                        </div>
+    
+                    </article>
+    
+    
+                    <!-- 4 -->
+    
+                    <article class="catalog-card">
+    
+                        <img src="./boxo.png" width="380px" class="catalog-image">
+    
+                        <div class="catalog-info">
+    
+                            <h3 class="catalog-name">
+                                Бохо
+                            </h3>
+    
+                            <p class="catalog-description">
+                                Композиция с элементами ручной графики. Небрежная романтичность, лёгкий акцент на детали создают ощущение богемного праздника.
+                            </p>
+                            <div class="catalog-actions">
+    
+                                <button class="main-button-ctlg" data-open-modal>
+                                    Заказать
+                                </button>
+                    
+                                <a
+                                    href="бохо.pdf"
+                                    class="catalog-pdf"
+                                    target="_blank"
+                                    aria-label="Открыть PDF"
+                                >
+                                  &gt;
+                                </a>
+                    
+                            </div>
+                        </div>
+    
+                    </article>
+    
+    
+                    <!-- 5 -->
+    
+                    <article class="catalog-card">
+    
+                        <img src="./rustik.png" width="380px" class="catalog-image">
+    
+                        <div class="catalog-info">
+    
+                            <h3 class="catalog-name">
+                                Рустик
+                            </h3>
+    
+                            <p class="catalog-description">
+                                Приглашение в тёплом, естественном стиле. Композиция выдержана в духе камерности, идеально передаёт атмосферу душевной, искренней свадьбы.
+                            </p>
+                            <div class="catalog-actions">
+    
+                                <button class="main-button-ctlg" data-open-modal>
+                                    Заказать
+                                </button>
+                    
+                                <a
+                                    href="эко/рустик.pdf"
+                                    class="catalog-pdf"
+                                    target="_blank"
+                                    aria-label="Открыть PDF"
+                                >
+                                    &gt;
+                                </a>
+                    
+                            </div>
+                        </div>
+    
+                    </article>
+    
+                </div>
+    
+            </div>
+    
+    
+            <div class="slider-controls">
+    
+                <button class="slider-arrow" id="prev">
+                    ←
+                </button>
+    
+                <span class="slider-counter" id="counter">
+                    01 / 05
+                </span>
+    
+                <button class="slider-arrow" id="next">
+                    →
+                </button>
+    
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =======================================================
+     TARIFFS
+     ======================================================= -->
+
+<section class="tariffs section" id="tariffs">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <h2 class="section-title-tarif">
+                Тарифы
+            </h2>
+
+        </div>
+
+
+        <div class="tariff-list">
+
+
+            <article class="tariff reveal">
+
+                <div class="tariff-top">
+
+                    <h3 class="tariff-name">
+                        Базовый
+                    </h3>
+
+                    <div class="tariff-price">
+                        3 500 ₽
+                    </div>
+
+                </div>
+
+                <ul>
+
+                    <li>Дизайн на основе выбранного шаблона</li>
+
+                    <li>Замена текста и фото на ваши</li>
+
+                    <li>Возможность изменить цвета шаблона</li>
+
+                    <li>
+                        Гостевая анкета:
+                        ФИО, участие + 1 вопрос
+                    </li>
+
+                </ul>
+                <div class="tariff-more">
+                    *Идеальный вариант для красивого, лаконичного приглашения.
+                </div>
+            </article>
+
+
+
+            <article class="tariff reveal">
+
+                <div class="tariff-top">
+
+                    <h3 class="tariff-name">
+                        Комфорт
+                    </h3>
+
+                    <div class="tariff-price">
+                        4 500 ₽
+                    </div>
+
+                </div>
+
+                <ul>
+
+                    <li>Дизайн на основе выбранного шаблона</li>
+
+                    <li>Замена текста и фото на ваши</li>
+
+                    <li>Возможность изменить цвета шаблона</li>
+
+                    <li>Дополнительный информационный блок</li>
+
+                    <li>Расширенная анкета из 5 вопросов</li>
+
+                </ul>
+                <div class="tariff-more">
+                    *Для тех, кто хочет собрать больше информации от гостей заранее.
+                </div>
+            </article>
+
+
+
+            <article class="tariff premium reveal">
+
+                <div class="tariff-top">
+
+                    <h3 class="tariff-name">
+                        Премиум
+                    </h3>
+
+                    <div class="tariff-price">
+                        6 000 ₽
+                    </div>
+
+                </div>
+
+
+                <ul>
+
+                    <li>Дизайн с нуля по вашим пожеланиям</li>
+
+                    <li>Полное оформление всех блоков</li>
+
+                    <li>2 дополнительных информационных блока</li>
+
+                    <li>Персональная анкета из 5 вопросов</li>
+
+                </ul>
+                <div class="tariff-more">
+                    *Уникальное приглашение, полностью отражающее стиль <br> вашей свадьбы.
+                </div>
+            </article>
+
+
+        </div>
+        <button class="main-button" data-open-modal>
+            Заказать
+        </button>
+    </div>
+
+</section>
+
+<!-- =======================================================
+     video
+     ======================================================= -->
+
+     <section class="full-photo">
+        <div class="container">
+            <img src="./video.GIF" class="video-image" style="height: 400px;" alt="">
+        </div>
+    </section>
+
+<!-- =======================================================
+     STEPS
+     ======================================================= -->
+
+<section class="steps section" id="steps">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <h2 class="section-title-steps">
+                Этапы работы
+            </h2>
+
+        </div>
+
+
+            <article class="step reveal">
+
+                <div>
+
+                    <h3>Концепция</h3>
+
+                    <p>
+                        Согласуем шаблон и цветовую гамму,
+                        чтобы создать идеальный стиль.
+                    </p>
+
+                </div>
+                <span class="step-number">01</span>
+            </article>
+
+
+            <article class="step reveal">
+
+                <div>
+
+                    <h3>Сбор данных</h3>
+
+                    <p>
+                        Заполняем бриф для точной настройки
+                        всех деталей.
+                    </p>
+
+                </div>
+                <span class="step-number">02</span>
+            </article>
+
+
+            <article class="step reveal">
+
+                <div>
+
+                    <h3>Дизайн</h3>
+
+                    <p>
+                        Разрабатываем уникальное приглашение,
+                        учитывая ваши пожелания.
+                    </p>
+
+                </div>
+                <span class="step-number">03</span>
+            </article>
+
+
+            <article class="step reveal">
+
+                <div>
+
+                    <h3>Отправка</h3>
+
+                    <p>
+                        Отправляем готовое приглашение
+                        и таблицу <br> для ответов гостей.
+                    </p>
+
+                </div>
+                <span class="step-number">04</span>
+            </article>
+
+
+        <button
+            class="main-button"
+            data-open-modal
+            style="margin-top:35px;"
+        >
+            Заказать
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- =======================================================
+     FAQ
+     ======================================================= -->
+
+<section class="faq section" id="faq">
+
+    <div class="container">
+
+        <div class="reveal">
+            <img src="phone.png" alt="" style="width: 214px;" class="faq-image">
+            <h2 class="section-title-faq">
+                Часто спрашивают
+            </h2>
+            <div class="faq-list" >
+
+
+                <article class="faq-item active">
+    
+                    <button class="faq-question">
+    
+                        <span>
+                            Какие дополнительные <br> блоки можно добавить?
+                        </span>
+    
+                        <span class="faq-plus">+</span>
+    
+                    </button>
+    
+                    <div class="faq-answer">
+    
+                        Вы можете включить до двух дополнительных
+                        секций в зависимости от тарифа.
+    
+                        Можно указать: вторую локацию,
+                        пожелания к подаркам, ссылку на свадебные
+                        фотографии после торжества, короткую историю
+                        вашей пары, программу для выездной свадьбы
+                        или информацию о размещении гостей.
+    
+                    </div>
+    
+                </article>
+    
+    
+    
+                <article class="faq-item">
+    
+                    <button class="faq-question">
+    
+                        <span>
+                            Нужен ли нам
+                            индивидуальный дизайн?
+                        </span>
+    
+                        <span class="faq-plus">+</span>
+    
+                    </button>
+    
+                    <div class="faq-answer">
+    
+                        Чаще всего — нет. Самый популярный выбор —
+                        тариф «Комфорт» с расширенной анкетой
+                        и стильным шаблоном.
+    
+                        Индивидуальный дизайн подойдёт,
+                        если у вас тематическая свадьба
+                        и вы хотите отразить стиль до мелочей.
+    
+                    </div>
+    
+                </article>
+    
+    
+    
+                <article class="faq-item">
+    
+                    <button class="faq-question">
+    
+                        <span>
+                            Сколько создается
+                            приглашение?
+                        </span>
+    
+                        <span class="faq-plus">+</span>
+    
+                    </button>
+    
+                    <div class="faq-answer">
+    
+                        От 1 до 4 дней в зависимости от тарифа
+                        и уровня кастомизации.
+    
+                    </div>
+    
+                </article>
+    
+    
+    
+                <article class="faq-item">
+    
+                    <button class="faq-question">
+    
+                        <span>
+                            Сколько действует
+                            приглашение?
+                        </span>
+    
+                        <span class="faq-plus">+</span>
+    
+                    </button>
+    
+                    <div class="faq-answer">
+    
+                        Базово — 90 дней. Нужно дольше? Не проблема, просто предупредите заранее.
+    
+                    </div>
+    
+                </article>
+    
+    
+    
+                <article class="faq-item">
+    
+                    <button class="faq-question">
+    
+                        <span>
+                            Когда начинает действовать
+                            приглашение?
+                        </span>
+    
+                        <span class="faq-plus">+</span>
+    
+                    </button>
+    
+                    <div class="faq-answer">
+    
+                        Приглашение активируется не сразу после оплаты,
+                        а в момент, когда оно полностью готово!
+    
+                    </div>
+    
+                </article>
+    
+    
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =======================================================
+     CONTACTS
+     ======================================================= -->
+
+<section class="contacts section" id="contacts">
+    <div class="reveal">
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-socials">
+
+                    <a
+                        href="https://www.instagram.com/strwbrdesing?stkn=N2l0YzA0Nmh2eXRj&utm_source=qr"
+                        class="footer-social"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Instagram"
+                    >
+                        <img src="instagram.svg" alt="">
+                    </a>
+        
+                    <a
+                        href="https://t.me/mslwvika"
+                        class="footer-social"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Telegram"
+                    >
+                        <img src="telegram.svg" alt="">
+                    </a>
+        
+                </div>
+        
+        
+                <a
+                    href="mailto:mslwvika@gmail.com"
+                    class="footer-email"
+                >
+                    mslwvika@gmail.com
+                </a>
+        
+        
+                <p class="footer-copy">
+                    @ВСЕ ПРАВА ЗАЩИЩЕНЫ
+                </p>
+        
+        
+                <a
+                    href="privacy-policy.html"
+                    class="footer-policy"
+                >
+                    Политика конфиденциальности
+                </a>
+        
+            </div>
+        
+        </footer>
+    </div>
+</section>
+
+</main>
+
+
+
+<!-- =======================================================
+     MODAL
+     ======================================================= -->
+
+<div class="modal" id="orderModal">
+
+    <div class="modal-content">
+
+        <div class="modal-head">
+
+            <h2 class="modal-title">
+                Заказать<br>
+                приглашение
+            </h2>
+
+            <button
+                class="close-modal"
+                id="closeModal"
+                aria-label="Закрыть"
+            >
+                х
+            </button>
+
+        </div>
+
+
+        <form id="orderForm">
+
+
+            <!-- NAME -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    1. Ваше имя
+                </label>
+
+                <input
+                    class="form-input"
+                    type="text"
+                    name="name"
+                    placeholder="Введите имя"
+                    required
+                >
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    2. Номер телефона
+                </label>
+
+                <input
+                    class="form-input"
+                    type="tel"
+                    name="phone"
+                    placeholder="+7 (___) ___-__-__"
+                    required
+                >
+
+            </div>
+
+
+            <!-- TEMPLATE -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    3. Какой шаблон хотите выбрать?
+                </label>
+
+                <select
+                    class="form-select"
+                    name="template"
+                    required
+                >
+
+                    <option value="" disabled selected>
+                        Выберите шаблон
+                    </option>
+
+                    <option>
+                        Минимализм
+                    </option>
+
+                    <option>
+                        Бохо
+                    </option>
+
+                    <option>
+                        Гранат
+                    </option>
+
+                    <option>
+                        Рустик
+                    </option>
+
+                    <option>
+                        Романтик
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TARIFF -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    4. Какой тариф вы бы хотели выбрать?
+                </label>
+
+                <select
+                    class="form-select"
+                    name="tariff"
+                    required
+                >
+
+                    <option value="" disabled selected>
+                        Выберите тариф
+                    </option>
+
+                    <option>
+                        Базовый
+                    </option>
+
+                    <option>
+                        Комфорт
+                    </option>
+
+                    <option>
+                        Премиум
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TELEGRAM -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    5. Ник Telegram для связи
+                </label>
+
+                <input
+                    class="form-input"
+                    type="text"
+                    name="telegram"
+                    placeholder="@username"
+                    required
+                >
+
+            </div>
+
+
+            <!-- AGREEMENTS -->
+
+            <label class="checkbox">
+
+                <input
+                    type="checkbox"
+                    required
+                >
+
+                <span>
+                    Я согласен(а) на обработку
+                    персональных данных.
+                </span>
+
+            </label>
+
+
+            <label class="checkbox">
+
+                <input
+                    type="checkbox"
+                    required
+                >
+
+                <span>
+                    Я принимаю условия
+                    политики конфиденциальности.
+                </span>
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="form-submit"
+            >
+                Отправить заявку
+            </button>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     PDF VIEWER
+     ========================================================= -->
+
+     <div class="pdf-viewer" id="pdfViewer">
+
+        <iframe
+            class="pdf-frame"
+            id="pdfFrame"
+            src=""
+            title="PDF"
+        ></iframe>
+    
+        <button
+            class="pdf-back"
+            id="pdfBack"
+            type="button"
+        >
+            ← Вернуться назад
+        </button>
+    
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfFrame = document.getElementById('pdfFrame');
+            const pdfBack = document.getElementById('pdfBack');
+        
+            const pdfButtons = document.querySelectorAll('.catalog-pdf');
+        
+        
+            /* Открываем PDF */
+        
+            pdfButtons.forEach(function (button) {
+        
+                button.addEventListener('click', function () {
+        
+                    const pdfFile = button.dataset.pdf;
+        
+                    if (!pdfFile) return;
+        
+                    pdfFrame.src = pdfFile;
+        
+                    pdfViewer.classList.add('active');
+        
+                    document.body.style.overflow = 'hidden';
+        
+                });
+        
+            });
+        
+        
+            /* Возвращаемся к каталогу */
+        
+            pdfBack.addEventListener('click', function () {
+        
+                pdfViewer.classList.remove('active');
+        
+                pdfFrame.src = '';
+        
+                document.body.style.overflow = '';
+        
+            });
+        
+        });
+        </script>    
+
+<script>
+/* =========================================================
+   PRELOADER
+   ========================================================= */
+
+   const preloader = document.getElementById('preloader');
+const preloaderVideo = document.getElementById('preloaderVideo');
+
+preloaderVideo.addEventListener('ended', () => {
+    preloader.classList.add('hide');
+});
+
+/* =========================================================
+   BURGER MENU
+   ========================================================= */
+
+const burger = document.getElementById('burger');
+const sideMenu = document.getElementById('sideMenu');
+
+burger.addEventListener('click', () => {
+
+    burger.classList.toggle('active');
+    sideMenu.classList.toggle('open');
+
+});
+
+
+/* закрываем меню после перехода */
+
+document.querySelectorAll('.menu-links a').forEach(link => {
+
+    link.addEventListener('click', () => {
+
+        burger.classList.remove('active');
+        sideMenu.classList.remove('open');
+
+    });
+
+});
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+const modal = document.getElementById('orderModal');
+const closeModal = document.getElementById('closeModal');
+
+document.querySelectorAll('[data-open-modal]').forEach(button => {
+
+    button.addEventListener('click', () => {
+
+        modal.classList.add('open');
+
+        document.body.style.overflow = 'hidden';
+
+        burger.classList.remove('active');
+        sideMenu.classList.remove('open');
+
+    });
+
+});
+
+
+closeModal.addEventListener('click', closeOrderModal);
+
+
+modal.addEventListener('click', (event) => {
+
+    if (event.target === modal) {
+        closeOrderModal();
+    }
+
+});
+
+
+function closeOrderModal() {
+
+    modal.classList.remove('open');
+
+    document.body.style.overflow = '';
+
+}
+
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
+const faqItems = document.querySelectorAll('.faq-item');
+
+faqItems.forEach(item => {
+
+    const question = item.querySelector('.faq-question');
+
+    question.addEventListener('click', () => {
+
+        const wasActive = item.classList.contains('active');
+
+        /* закрываем остальные */
+
+        faqItems.forEach(other => {
+
+            other.classList.remove('active');
+
+        });
+
+        /* если этот был закрыт — открываем */
+
+        if (!wasActive) {
+
+            item.classList.add('active');
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATIONS
+   ========================================================= */
+
+const revealElements = document.querySelectorAll('.reveal, .adv-card');
+
+const observer = new IntersectionObserver(
+
+    entries => {
+
+        entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+                entry.target.classList.add('visible');
+
+            }
+
+        });
+
+    },
+
+    {
+        threshold: .12
+    }
+
+);
+
+
+revealElements.forEach(element => {
+
+    observer.observe(element);
+
+});
+
+
+/* =========================================================
+   CATALOG INFINITE SLIDER
+   ========================================================= */
+
+const track = document.getElementById('sliderTrack');
+const slider = document.getElementById('slider');
+const nextButton = document.getElementById('next');
+const prevButton = document.getElementById('prev');
+const counter = document.getElementById('counter');
+
+const originalCards = Array.from(
+    track.querySelectorAll('.catalog-card')
+);
+
+
+/*
+   Клонируем карточки в начало и конец.
+   Благодаря этому визуально получается
+   бесконечная карусель.
+*/
+
+originalCards.forEach(card => {
+
+    const clone = card.cloneNode(true);
+
+    track.appendChild(clone);
+
+});
+
+originalCards
+    .slice()
+    .reverse()
+    .forEach(card => {
+
+        const clone = card.cloneNode(true);
+
+        track.insertBefore(
+            clone,
+            track.firstChild
+        );
+
+    });
+
+
+let currentIndex = originalCards.length;
+
+let cardWidth = 0;
+
+
+function calculateSlider() {
+
+    const firstCard =
+        track.querySelector('.catalog-card');
+
+    const gap = 12;
+
+    cardWidth =
+        firstCard.getBoundingClientRect().width + gap;
+
+    moveSlider(false);
+
+}
+
+
+function moveSlider(animated = true) {
+
+    track.style.transition =
+        animated
+            ? 'transform .55s cubic-bezier(.2,.8,.2,1)'
+            : 'none';
+
+    track.style.transform =
+        `translateX(-${currentIndex * cardWidth}px)`;
+
+    updateCounter();
+
+}
+
+
+function updateCounter() {
+
+    let realIndex =
+        currentIndex % originalCards.length;
+
+    if (realIndex < 0) {
+        realIndex += originalCards.length;
+    }
+
+    counter.textContent =
+        `${String(realIndex + 1).padStart(2,'0')} / 05`;
+
+}
+
+
+nextButton.addEventListener('click', () => {
+
+    currentIndex++;
+
+    moveSlider(true);
+
+});
+
+
+prevButton.addEventListener('click', () => {
+
+    currentIndex--;
+
+    moveSlider(true);
+
+});
+
+
+track.addEventListener(
+    'transitionend',
+    () => {
+
+        /*
+           Если дошли до клона —
+           мгновенно переносим обратно
+           на оригинальную карточку.
+        */
+
+        if (
+            currentIndex >=
+            originalCards.length * 2
+        ) {
+
+            currentIndex =
+                originalCards.length;
+
+            moveSlider(false);
+
+        }
+
+        if (currentIndex < originalCards.length) {
+
+            currentIndex =
+                originalCards.length * 2 - 1;
+
+            moveSlider(false);
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SWIPE НА МОБИЛЬНОМ
+   ========================================================= */
+
+let startX = 0;
+let endX = 0;
+
+slider.addEventListener(
+    'touchstart',
+    event => {
+
+        startX =
+            event.touches[0].clientX;
+
+    },
+    { passive: true }
+);
+
+
+slider.addEventListener(
+    'touchend',
+    event => {
+
+        endX =
+            event.changedTouches[0].clientX;
+
+        const difference =
+            startX - endX;
+
+        if (Math.abs(difference) < 45) {
+            return;
+        }
+
+        if (difference > 0) {
+
+            currentIndex++;
+            moveSlider(true);
+
+        } else {
+
+            currentIndex--;
+            moveSlider(true);
+
+        }
+
+    },
+    { passive: true }
+);
+
+
+window.addEventListener(
+    'resize',
+    calculateSlider
+);
+
+
+calculateSlider();
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+   const orderForm = document.getElementById('orderForm');
+
+orderForm.addEventListener('submit', async (event) => {
+
+    event.preventDefault();
+
+    const formData = new FormData(orderForm);
+
+    try {
+
+        /* =====================================================
+           1. GOOGLE SHEETS
+           ===================================================== */
+
+        const googleResponse = await fetch(
+            'https://script.google.com/macros/s/AKfycby7UbFiDmIVf6Ww8tX11T3-E6sABecQL2yx9pg4QEGZ0NFPsw9HjYqJARto5wMFZ-6OPQ/exec',
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!googleResponse.ok) {
+            throw new Error('Ошибка отправки в Google Таблицу');
+        }
+
+
+        /* =====================================================
+           2. TELEGRAM / GITHUB BACKEND
+           ===================================================== */
+
+        const telegramResponse = await fetch(
+            'https://github.com/vikamaslova/wedding.git',
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!telegramResponse.ok) {
+            throw new Error('Ошибка отправки в Telegram');
+        }
+
+
+        /* =====================================================
+           УСПЕШНАЯ ОТПРАВКА
+           ===================================================== */
+
+        alert('Спасибо! Заявка отправлена.');
+
+        orderForm.reset();
+
+        closeOrderModal();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            'Не удалось отправить заявку. Попробуйте ещё раз.'
+        );
+
+    }
+
+});
+
+
+/* =========================================================
+   ESC — ЗАКРЫТИЕ POPUP
+   ========================================================= */
+
+document.addEventListener(
+    'keydown',
+    event => {
+
+        if (
+            event.key === 'Escape' &&
+            modal.classList.contains('open')
+        ) {
+
+            closeOrderModal();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
