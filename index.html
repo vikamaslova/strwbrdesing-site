@@ -1580,14 +1580,13 @@ section {
     }
 
     .side-menu.open {
-        transform: translateX(calc(50% - 0px));
+        transform: translateX(calc(-50% - 0px));
     }
 
     .hero,
     .section {
         width: 100%;
         max-width: 100%;
-        margin: auto;
     }
 
      .modal {
@@ -2914,22 +2913,6 @@ faqItems.forEach(item => {
     question.addEventListener('click', () => {
 
         const wasActive = item.classList.contains('active');
-
-        /* закрываем остальные */
-
-        faqItems.forEach(other => {
-
-            other.classList.remove('active');
-
-        });
-
-        /* если этот был закрыт — открываем */
-
-        if (!wasActive) {
-
-            item.classList.add('active');
-
-        }
 
     });
 
