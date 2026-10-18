@@ -326,29 +326,31 @@ section {
 
 .side-menu {
     position: fixed;
-    top: 0;
-    right: 0;
-    background: #9C0000;
-
-    width: 100%;
-    max-width: 390px;
-    height: 100vh;
-    height: 100dvh;
-    padding: 90px 10px 5px;
-    box-sizing: border-box;
     z-index: 999;
 
-    transform: translateX(calc(100% + 50vw));
-    transition: transform 0.4s ease;
+    top: 0;
+    right: 0;
+
+    width: min(100vw, 420px);
+    height: 100dvh;
+
+    background: var(--red);
+
+    padding: 90px 10px 5px;
+
+    transform: translateX(105%);
+    transition: transform .55s cubic-bezier(.77,0,.18,1);
+
+    display: flex;
+    flex-direction: column;
 }
 
 .side-menu.open {
-    transform: translateX(-50%);
+    transform: translateX(0);
 }
 
-
 .menu-title {
-    color: #fff;
+    color: rgba(255,255,255,.5);
     font-size: 12px;
     font-family: 'Inter';
     font-style: light;
@@ -1572,19 +1574,13 @@ section {
     }
 
     .side-menu {
-        width: min(390px, 100%);
-        max-width: 390px;
         left: 50%;
         right: auto;
-        transform: translateX(200%);
-        background: var(--red, #9C0000);
-        color: #fff;
-        overflow-y: auto;
-        z-index: 2000;
+        transform: translateX(calc(50% + 600px));
     }
 
     .side-menu.open {
-        transform: translateX(-50%);
+        transform: translateX(calc(50% - 0px));
     }
 
     .hero,
