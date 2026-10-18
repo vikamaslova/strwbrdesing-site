@@ -2904,20 +2904,20 @@ function closeOrderModal() {
    FAQ
    ========================================================= */
 
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
 const faqItems = document.querySelectorAll('.faq-item');
 
 faqItems.forEach(item => {
-
     const question = item.querySelector('.faq-question');
 
     question.addEventListener('click', () => {
-
-        const wasActive = item.classList.contains('active');
-
+        item.classList.toggle('active');
     });
-
 });
-
 
 /* =========================================================
    REVEAL ANIMATIONS
