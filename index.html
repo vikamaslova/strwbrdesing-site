@@ -1420,45 +1420,69 @@ section {
 
     z-index: 2000;
 
-    background: rgba(20,8,10,.55);
+     display: flex;
+    align-items: center;
+    justify-content: center;
 
+    padding: 10px;
+    box-sizing: border-box;
+
+    background: rgba(20, 8, 10, 0.55);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 
-    display: flex;
-    align-items: flex-end;
     opacity: 0;
     visibility: hidden;
-    transition: .4s;
+    pointer-events: none;
+
+    transition:
+        opacity 0.4s ease,
+        visibility 0.4s ease;
 }
 
+
 .modal.open {
-    opacity: 1;
-    visibility: visible;
+   opacity: 1;
+   visibility: visible;
+   pointer-events: auto;
 }
 
 .modal-content {
-     width: 100%;
+     position: relative;
+
+    width: 100%;
     max-width: 390px;
 
-    height: 100vh;
-    height: 100dvh;
-    max-height: 100dvh;
+    /* Высота подстраивается под экран */
+    height: auto;
+    max-height: 100%;
+    max-height: calc(100dvh - 20px);
 
     box-sizing: border-box;
+
+    /* Прокручивается только форма внутри */
     overflow-y: auto;
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-   
+
     background: #FFFFFF;
-    border-radius: 20px 20px 0 0;
+    border-radius: 20px;
+
+    /* Сверху и по бокам 20px, снизу 35px */
     padding: 20px 20px 35px;
-    transform: translateY(100%);
+
+    /* Начальная позиция — ниже экрана */
+    transform: translateY(40px);
+    opacity: 0;
+
     transition:
-        transform .55s cubic-bezier(.2,.8,.2,1);
+        transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.4s ease;
 }
 
 .modal.open .modal-content {
     transform: translateY(0);
+    opacity: 1;
 }
 
 .modal-head {
@@ -2662,34 +2686,39 @@ video {
 
             <!-- AGREEMENTS -->
 
-            <label class="checkbox">
+           <label class="checkbox">
+    <input
+        type="checkbox"
+        name="personal_data_consent"
+        required
+    >
 
-                <input
-                    type="checkbox"
-                    required
-                >
+    <span>
+        Я даю согласие на
+        <a
+            href="/personal-data-processing.html"
+            target="_blank"
+            rel="noopener noreferrer"
+        >обработку персональных данных</a>.
+    </span>
+</label>
 
-                <span>
-                    Я согласен(а) на обработку
-                    персональных данных.
-                </span>
+<label class="checkbox">
+    <input
+        type="checkbox"
+        name="privacy_policy"
+        required
+    >
 
-            </label>
-
-
-            <label class="checkbox">
-
-                <input
-                    type="checkbox"
-                    required
-                >
-
-                <span>
-                    Я принимаю условия
-                    политики конфиденциальности.
-                </span>
-
-            </label>
+    <span>
+        Я принимаю условия
+        <a
+            href="/privacy-policy.html"
+            target="_blank"
+            rel="noopener noreferrer"
+        >политики конфиденциальности</a>.
+    </span>
+</label>
 
 
             <button
