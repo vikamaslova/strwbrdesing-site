@@ -3234,23 +3234,6 @@ orderForm.addEventListener('submit', async (event) => {
 
 
         /* =====================================================
-           2. TELEGRAM / GITHUB BACKEND
-           ===================================================== */
-
-        const telegramResponse = await fetch(
-            'https://github.com/vikamaslova/wedding.git',
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-
-        if (!telegramResponse.ok) {
-            throw new Error('Ошибка отправки в Telegram');
-        }
-
-
-        /* =====================================================
            УСПЕШНАЯ ОТПРАВКА
            ===================================================== */
 
